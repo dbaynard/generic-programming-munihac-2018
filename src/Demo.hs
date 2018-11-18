@@ -23,6 +23,8 @@ import Data.Proxy
 import Data.Void
 import GHC.TypeLits
 
+import Data.Function
+
 data Code =
     Zero
   | One
@@ -198,3 +200,48 @@ instance (KnownSymbol n, GShow c) => GShow (Constructor n c) where
   gshow x = symbolVal (Proxy @n) ++ " " ++ gshow @c x
 
 
+rel0 :: Int -> [Int]
+rel0 0 = [0]
+rel0 1 = [2]
+rel0 2 = [0,3]
+rel0 3 = [4]
+rel0 4 = [1]
+rel0 _ = []
+
+rel1 0 = [0]
+rel1 n
+  | even n = [n, n `div` 2]
+  | otherwise = [3*n + 1, n]
+
+rel2 11 = [22]
+rel2 22 = [33]
+rel2 33 = [44]
+rel2 n
+  | even n, n>=1, n<=9 = [2,4,6,8]
+  | odd n, n>=1, n<=9 = [1,3,5,7,9]
+  | otherwise = [n]
+
+trancl :: forall a . Eq a => (a -> [a]) -> [a] -> [a]
+trancl r x0 = go [] x0
+  where
+
+    flatMapped :: [a] -> [a]
+    flatMapped xs = concatMap r xs
+
+    filtered :: [a] -> [a] -> [a]
+    filtered seen xs = filter (`notElem` seen) xs
+
+    tgthr :: [a] -> [a] -> [a]
+    tgthr seen = filtered seen . flatMapped
+
+    go out [] = out
+    go out inp = let next = tgthr out inp in go (out ++ next) next
+
+    {-
+     -go1 = tgthr [] [1]
+     -go2 = tgthr [2] [2]
+     -go3 = tgthr [2,0,3] [0,3]
+     -go4 = tgthr [2,0,3,4] [4]
+     -go5 = tgthr [2,0,3,4,1] [1]
+     -go6 = tgthr [2,0,3,4,1] []
+     -}
