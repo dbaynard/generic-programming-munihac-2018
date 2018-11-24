@@ -4,6 +4,7 @@ author: Andres Löh <andres@well-typed.com>
 license: UnspecifiedLicense
 dependencies:
 - base
+- mtl
 - sop-core >=0.4 && <0.5
 - generics-sop >=0.4.0.1 && <0.5
 library:
@@ -17,6 +18,8 @@ tests:
     - test
     main: Spec.hs
     dependencies:
+    - QuickCheck
+    - quickcheck-instances
     - generic-programming-munihac
     - hspec
     - async
@@ -24,3 +27,13 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+
+ghc-options:
+- -Wall
+- -Wincomplete-uni-patterns
+- -Wincomplete-record-updates
+#- -Wmissing-import-lists
+- -Wcompat
+- -Wnoncanonical-monad-instances
+- -Wnoncanonical-monadfail-instances
+- -ddump-minimal-imports

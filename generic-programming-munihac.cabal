@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 685bcc861b81f52dc9b421fc4746cd1003a05b419f134285bac2dbeb8fa4b80c
+-- hash: 978a97eae40042069c90633cdd9f027e74ff6f55367f51f70fb2c123765637f1
 
 name:           generic-programming-munihac
 version:        2018
@@ -15,6 +15,7 @@ build-type:     Simple
 library
   hs-source-dirs:
     src
+  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -ddump-minimal-imports
   default-language: Haskell2010
   exposed-modules:
     Demo
@@ -23,6 +24,7 @@ library
   build-depends:
     base,
     generics-sop >=0.4.0.1 && <0.5,
+    mtl,
     sop-core >=0.4 && <0.5
 
 test-suite translc
@@ -35,12 +37,15 @@ test-suite translc
   hs-source-dirs:
     src
     test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -ddump-minimal-imports -threaded -rtsopts -with-rtsopts=-N
   build-depends:
+    QuickCheck,
     async,
     base,
     generic-programming-munihac,
     generics-sop >=0.4.0.1 && <0.5,
     hspec,
+    mtl,
+    quickcheck-instances,
     sop-core >=0.4 && <0.5
   default-language: Haskell2010
