@@ -19,6 +19,7 @@ tests:
     dependencies:
     - generic-programming-munihac
     - hspec
+    - async
     ghc-options:
     - -threaded
     - -rtsopts

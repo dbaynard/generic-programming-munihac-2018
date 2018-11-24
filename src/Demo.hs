@@ -221,6 +221,8 @@ rel2 n
   | odd n, n>=1, n<=9 = [1,3,5,7,9]
   | otherwise = [n]
 
+rel3 i = [i + 1]
+
 trancl :: forall a . Eq a => (a -> [a]) -> [a] -> [a]
 trancl r x0 = go [] x0
   where
