@@ -39,19 +39,25 @@ spec = do
   describe "Diagonalization" $ do
     prop "makes the right initial diagonal" $ \as'@((a :: Int) :| as) bs'@((b :: Int) :| bs) -> do
       mkDiagonal (NE.toList as') (NE.toList bs') === Just (Z [] a (F as) `Down` Z [] b (F bs))
-    it "correct diagonalizations 1×1" $ do
-      diagonal [1..1] [1..1] `shouldBe` [(1 :: Int,1 :: Int)]
-    it "correct diagonalizations 2×2" $ do
-      diagonal [1..2] [1..2] `shouldBe` [(1 :: Int,1 :: Int),(2,1),(1,2),(2,2)]
-    it "correct diagonalizations 3×3" $ do
-      diagonal [1..3] [1..3] `shouldBe` [(1 :: Int,1 :: Int),(2,1),(1,2),(1,3),(2,2),(3,1),(3,2),(2,3),(3,3)]
     it "makes the right specific initial diagonal" $ do
       mkDiagonal ['A'..'E'] [0..4 :: Int] `shouldBe` Just (Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4])
     testingDiagonalExamples "Down first" orderedDown
     testingDiagonalExamples "Across first" orderedAcross
 
+    diagonalTests diagonal
+
+diagonalTests :: ([Int] -> [Int] -> [(Int,Int)]) -> Spec
+diagonalTests f = do
+  describe "Testing diagonal function directly" $ do
+    it "correct diagonalizations 1×1" $ do
+      f [1..1] [1..1] `shouldBe` [(1,1)]
+    it "correct diagonalizations 2×2" $ do
+      f [1..2] [1..2] `shouldBe` [(1,1),(2,1),(1,2),(2,2)]
+    it "correct diagonalizations 3×3" $ do
+      f [1..3] [1..3] `shouldBe` [(1,1),(2,1),(1,2),(1,3),(2,2),(3,1),(3,2),(2,3),(3,3)]
     it "Works for infinite list" $ do
-      take 20 (diagonal [0..] [0..]) `shouldBe` [(0 :: Int,0 :: Int),(1,0),(0,1),(0,2),(1,1),(2,0),(3,0),(2,1),(1,2),(0,3),(0,4),(1,3),(2,2),(3,1),(4,0),(5,0),(4,1),(3,2),(2,3),(1,4)]
+      take 21 (f [0..] [0..]) `shouldBe` [(0,0),(1,0),(0,1),(0,2),(1,1),(2,0),(3,0),(2,1),(1,2),(0,3),(0,4),(1,3),(2,2),(3,1),(4,0),(5,0),(4,1),(3,2),(2,3),(1,4),(0,5)]
+
 
 testingDiagonalExamples :: (Eq a, Eq b, Show a, Show b) => String -> [NextDiag a b] -> Spec
 testingDiagonalExamples lbl exs = describe (unwords ["Example diagonal for", lbl]) . sequence_ $
