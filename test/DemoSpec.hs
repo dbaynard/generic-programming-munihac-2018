@@ -51,15 +51,20 @@ spec = do
      -}
     it "makes the right specific initial diagonal" $ do
       mkDiagonal ['A'..'E'] [0..4 :: Int] `shouldBe` Just (Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4])
-    sequence_ $ testingDiagonalExample <$> ZipList [0..] <*> ZipList ordered <*> ZipList (tail ordered)
+    testingDiagonalExamples "Down first" orderedDown
+    testingDiagonalExamples "Across first" orderedAcross
 
-testingDiagonalExample :: (Eq a, Eq b, Show a, Show b) => Int -> (NextDiag a b) -> (NextDiag a b) -> Spec
-testingDiagonalExample n (_, Just ex) res = it (unwords ["Example iteration", show n, show (fst res)]) $
+testingDiagonalExamples :: (Eq a, Eq b, Show a, Show b) => String -> [NextDiag a b] -> Spec
+testingDiagonalExamples lbl exs = describe (unwords ["Example diagonal for", lbl]) . sequence_ $
+  testingDiagonalExample lbl <$> ZipList [0..] <*> ZipList exs <*> ZipList (tail exs)
+
+testingDiagonalExample :: (Eq a, Eq b, Show a, Show b) => String -> Int -> (NextDiag a b) -> (NextDiag a b) -> Spec
+testingDiagonalExample lbl n (_, Just ex) res = it (unwords [lbl , "step", show n, show (fst res)]) $
   nextDiag ex `shouldBe` res
-testingDiagonalExample _ _ _ = error "Invalid test input"
+testingDiagonalExample lbl _ _ _ = error . unwords $ ["Invalid test input for", lbl]
 
-ordered :: [NextDiag Char Int]
-ordered =
+orderedDown :: [NextDiag Char Int]
+orderedDown =
   [ (undefined, Just ( Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4]))
   , (('A',0), Just (Z ['A'] 'B' ['C'..'E'] `Across` Z [] 0 [1..4]))
   , (('B',0), Just (Z [] 'A' ['B'..'E'] `Across` Z [0] 1 [2..4]))
@@ -85,6 +90,36 @@ ordered =
   , (('E',2), Just (Z ['D'] 'E' [] `Across` Z [] 3 [4]))
   , (('E',3), Just (Z [] 'D' ['E'] `Across` Z [] 4 []))
   , (('D',4), Just (Z [] 'E' [] `Down` Z [] 4 []))
+  , (('E',4), Nothing)
+  ]
+
+orderedAcross :: [NextDiag Char Int]
+orderedAcross =
+  [ (undefined, Just ( Z [] 'A' ['B'..'E'] `Across` Z [] 0 [1..4]))
+  , (('A',0), Just (Z [] 'A' ['B'..'E'] `Down` Z [0] 1 [2..4]))
+  , (('A',1), Just (Z ['A'] 'B' ['C'..'E'] `Down` Z [] 0 [1..4]))
+  , (('B',0), Just (Z ['B','A'] 'C' ['D'..'E'] `Across` Z [] 0 [1..4]))
+  , (('C',0), Just (Z ['A'] 'B' ['C'..'E'] `Across` Z [0] 1 [2..4]))
+  , (('B',1), Just (Z [] 'A' ['B'..'E'] `Across` Z [1,0] 2 [3..4]))
+  , (('A',2), Just (Z [] 'A' ['B'..'E'] `Down` Z [2,1..0] 3 [4]))
+  , (('A',3), Just (Z ['A'] 'B' ['C'..'E'] `Down` Z [1,0] 2 [3..4]))
+  , (('B',2), Just (Z ['B','A'] 'C' ['D'..'E'] `Down` Z [0] 1 [2..4]))
+  , (('C',1), Just (Z ['C','B'..'A'] 'D' ['E'] `Down` Z [] 0 [1..4]))
+  , (('D',0), Just (Z ['D','C'..'A'] 'E' [] `Across` Z [] 0 [1..4]))
+  , (('E',0), Just (Z ['C','B'..'A'] 'D' ['E'] `Across` Z [] 1 [2..4]))
+  , (('D',1), Just (Z ['B','A'] 'C' ['D'..'E'] `Across` Z [1] 2 [3..4]))
+  , (('C',2), Just (Z ['A'] 'B' ['C'..'E'] `Across` Z [2,1] 3 [4]))
+  , (('B',3), Just (Z [] 'A' ['B'..'E'] `Across` Z [3,2..1] 4 []))
+  , (('A',4), Just (Z [] 'B' ['C'..'E'] `Down` Z [3,2..1] 4 []))
+  , (('B',4), Just (Z [] 'C' ['D'..'E'] `Down` Z [2,1] 3 [4]))
+  , (('C',3), Just (Z ['C'] 'D' ['E'] `Down` Z [1] 2 [3..4]))
+  , (('D',2), Just (Z ['D','C'] 'E' [] `Down` Z [] 1 [2..4]))
+  , (('E',1), Just (Z ['D','C'] 'E' [] `Across` Z [] 2 [3,4]))
+  , (('E',2), Just (Z ['C'] 'D' ['E'] `Across` Z [] 3 [4]))
+  , (('D',3), Just (Z [] 'C' ['D'..'E'] `Across` Z [3] 4 []))
+  , (('C',4), Just (Z [] 'D' ['E'] `Down` Z [3] 4 []))
+  , (('D',4), Just (Z [] 'E' [] `Down` Z [] 3 [4]))
+  , (('E',3), Just (Z [] 'E' [] `Across` Z [] 4 []))
   , (('E',4), Nothing)
   ]
 
