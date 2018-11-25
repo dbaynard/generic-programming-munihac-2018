@@ -120,8 +120,7 @@ instance (GEnum c1, GEnum c2) => GEnum ('Plus c1 c2) where
     map Left (genum @c1) ++ map Right (genum @c2)
 
 instance (GEnum c1, GEnum c2) => GEnum ('Times c1 c2) where
-  genum =
-    [ (x, y) | x <- genum @c1, y <- genum @c2 ]
+  genum = genum @c1 `diagonal` genum @c2
 
 instance MyEnum a => GEnum ('Const a) where
   genum = enum
@@ -283,6 +282,7 @@ infixr 6 `Down`
 
 diagonal :: [a] -> [b] -> [(a,b)]
 diagonal = curry $ runDiag <=< maybeToList . uncurry mkDiagonal
+infix 3 `diagonal`
 
 mkDiagonal :: [a] -> [b] -> Maybe (Diagonal a b)
 mkDiagonal = curry $ fmap (uncurry Down) . azip . bimap mkZipper mkZipper
