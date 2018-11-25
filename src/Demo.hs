@@ -30,6 +30,7 @@ import Control.Monad.State
 import Control.Monad ((<=<))
 import Data.Bifunctor (bimap)
 import Data.Maybe (maybeToList)
+import Data.List (transpose)
 
 -- import Data.Function
 
@@ -279,6 +280,24 @@ data Diagonal a b
   deriving stock (Eq, Show)
 infixr 6 `Across`
 infixr 6 `Down`
+
+simpleDiagonal :: [a] -> [b] -> [(a,b)]
+simpleDiagonal xs0 ys0 = go [] $ makeCartesian xs0 ys0
+  where
+    makeCartesian xs ys = [[(x,y) | x <- xs] | y <- ys]
+    go :: forall c . [[c]] -> [[c]] -> [c]
+    go upper lower =
+        -- generate the upper left half and the diagonal, by sticking on
+        -- the head of each list in upper
+      [ h :: c | h:_ <- upper :: [[c]]] ++ case lower of
+        -- transpose the remaining lists
+        [] -> concat . transpose $ upper'
+        -- Recurse, by sticking on the new full-length list
+        -- Each round shrinks each row in upper' by 1
+        row:lower' -> go (row:upper') lower'
+        where
+          -- take the tails of all the lists in upper
+          upper' :: [[c]] = [ t :: [c] | _:t <- upper :: [[c]] ]
 
 diagonal :: [a] -> [b] -> [(a,b)]
 diagonal = curry $ runDiag <=< maybeToList . uncurry mkDiagonal

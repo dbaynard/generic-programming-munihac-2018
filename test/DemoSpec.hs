@@ -44,20 +44,36 @@ spec = do
     testingDiagonalExamples "Down first" orderedDown
     testingDiagonalExamples "Across first" orderedAcross
 
-    diagonalTests diagonal
+    diagonalTests diagonal diagSols
+    diagonalTests simpleDiagonal simpleDiagSols
 
-diagonalTests :: ([Int] -> [Int] -> [(Int,Int)]) -> Spec
-diagonalTests f = do
-  describe "Testing diagonal function directly" $ do
-    it "correct diagonalizations 1×1" $ do
-      f [1..1] [1..1] `shouldBe` [(1,1)]
-    it "correct diagonalizations 2×2" $ do
-      f [1..2] [1..2] `shouldBe` [(1,1),(2,1),(1,2),(2,2)]
-    it "correct diagonalizations 3×3" $ do
-      f [1..3] [1..3] `shouldBe` [(1,1),(2,1),(1,2),(1,3),(2,2),(3,1),(3,2),(2,3),(3,3)]
-    it "Works for infinite list" $ do
-      take 21 (f [0..] [0..]) `shouldBe` [(0,0),(1,0),(0,1),(0,2),(1,1),(2,0),(3,0),(2,1),(1,2),(0,3),(0,4),(1,3),(2,2),(3,1),(4,0),(5,0),(4,1),(3,2),(2,3),(1,4),(0,5)]
+diagonalTests :: ([Int] -> [Int] -> [(Int,Int)]) -> [[(Int, Int)]] -> Spec
+diagonalTests f sols = describe "Testing diagonal function directly" $
+    sequence_ $ zipWith g inputs sols
+  where
+    g (d,x) y = it d $ x `shouldBe` y
+    inputs =
+      [ ("correct diagonalizations 1×1", f [1..1] [1..1])
+      , ("correct diagonalizations 2×2", f [1..2] [1..2])
+      , ("correct diagonalizations 3×3", f [1..3] [1..3])
+      , ("Works for infinite list", take 21 (f [0..] [0..]))
+      ]
 
+simpleDiagSols :: [[(Int, Int)]]
+simpleDiagSols =
+  [ [(1,1)]
+  , [(1,1),(1,2),(2,1),(2,2)]
+  , [(1,1),(1,2),(2,1),(1,3),(2,2),(3,1),(2,3),(3,2),(3,3)]
+  , [(0,0),(0,1),(1,0),(0,2),(1,1),(2,0),(0,3),(1,2),(2,1),(3,0),(0,4),(1,3),(2,2),(3,1),(4,0),(0,5),(1,4),(2,3),(3,2),(4,1),(5,0)]
+  ]
+
+diagSols :: [[(Int, Int)]]
+diagSols =
+  [ [(1,1)]
+  , [(1,1),(2,1),(1,2),(2,2)]
+  , [(1,1),(2,1),(1,2),(1,3),(2,2),(3,1),(3,2),(2,3),(3,3)]
+  , [(0,0),(1,0),(0,1),(0,2),(1,1),(2,0),(3,0),(2,1),(1,2),(0,3),(0,4),(1,3),(2,2),(3,1),(4,0),(5,0),(4,1),(3,2),(2,3),(1,4),(0,5)]
+  ]
 
 testingDiagonalExamples :: (Eq a, Eq b, Show a, Show b) => String -> [NextDiag a b] -> Spec
 testingDiagonalExamples lbl exs = describe (unwords ["Example diagonal for", lbl]) . sequence_ $
