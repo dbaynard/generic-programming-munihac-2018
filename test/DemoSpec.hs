@@ -33,10 +33,8 @@ spec = do
       sort (trancl rel2 [42,8,9]) `shouldBe` [1,2,3,4,5,6,7,8,9,42]
     it "rel1" $
       sort (trancl rel1 [42,8,9]) `shouldBe` [1,2,4,5,7,8,9,10,11,13,14,16,17,20,21,22,26,28,32,34,40,42,52,64]
-    {-
-     -it "handles non-terminating relations" . raceTest $
-     -  take 10 (trancl rel3 [0]) `shouldBe` [1,2,3,4,5,6,7,8,9,10]
-     -}
+    xit "handles non-terminating relations" . raceTest $
+      take 10 (trancl rel3 [0]) `shouldBe` [1,2,3,4,5,6,7,8,9,10]
 
   describe "Diagonalization" $ do
     prop "makes the right initial diagonal" $ \as'@((a :: Int) :| as) bs'@((b :: Int) :| bs) -> do
@@ -51,6 +49,9 @@ spec = do
       mkDiagonal ['A'..'E'] [0..4 :: Int] `shouldBe` Just (Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4])
     testingDiagonalExamples "Down first" orderedDown
     testingDiagonalExamples "Across first" orderedAcross
+
+    it "Works for infinite list" $ do
+      take 20 (diagonal [0..] [0..]) `shouldBe` [(0 :: Int,0 :: Int),(1,0),(0,1),(0,2),(1,1),(2,0),(3,0),(2,1),(1,2),(0,3),(0,4),(1,3),(2,2),(3,1),(4,0),(5,0),(4,1),(3,2),(2,3),(1,4)]
 
 testingDiagonalExamples :: (Eq a, Eq b, Show a, Show b) => String -> [NextDiag a b] -> Spec
 testingDiagonalExamples lbl exs = describe (unwords ["Example diagonal for", lbl]) . sequence_ $
