@@ -1,11 +1,10 @@
-cabal-version: 1.12
-
--- This file has been generated from package.yaml by hpack version 0.31.0.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 978a97eae40042069c90633cdd9f027e74ff6f55367f51f70fb2c123765637f1
+-- hash: b9e8546579d42cd8cc971c0f17d1444f2a551d2b0fbd15f7318db5c0cc7704bb
 
+cabal-version:  >= 1.10
 name:           generic-programming-munihac
 version:        2018
 author:         Andres Löh <andres@well-typed.com>
@@ -15,7 +14,7 @@ build-type:     Simple
 library
   hs-source-dirs:
     src
-  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -ddump-minimal-imports
+  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
   default-language: Haskell2010
   exposed-modules:
     Demo
@@ -37,7 +36,7 @@ test-suite translc
   hs-source-dirs:
     src
     test
-  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -ddump-minimal-imports -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -threaded -rtsopts -with-rtsopts=-N
   build-depends:
     QuickCheck,
     async,

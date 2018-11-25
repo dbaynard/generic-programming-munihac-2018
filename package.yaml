@@ -36,4 +36,3 @@ ghc-options:
 - -Wcompat
 - -Wnoncanonical-monad-instances
 - -Wnoncanonical-monadfail-instances
-- -ddump-minimal-imports
