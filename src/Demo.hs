@@ -316,7 +316,7 @@ runDiag'
   -> Diagonal a b -> [(a,b)]
 runDiag' r d0 = case nextDiag d0 of
   (pair, Nothing) -> [pair]
-  (_, Just d1) -> r d1
+  (pair, Just d1) -> pair : r d1
 
 type NextDiag a b = ((a,b), Maybe (Diagonal a b))
 

@@ -41,14 +41,12 @@ spec = do
   describe "Diagonalization" $ do
     prop "makes the right initial diagonal" $ \as'@((a :: Int) :| as) bs'@((b :: Int) :| bs) -> do
       mkDiagonal (NE.toList as') (NE.toList bs') === Just (Z [] a (F as) `Down` Z [] b (F bs))
-    {-
-     -it "correct diagonalizations 1×1" $ do
-     -  diagonal [1..1] [1..1] `shouldBe` [(1 :: Int,1 :: Int)]
-     -it "correct diagonalizations 2×2" $ do
-     -  diagonal [1..2] [1..2] `shouldBe` [(1,1),(1,2),(2,1),(2,2)]
-     -it "correct diagonalizations 3×3" $ do
-     -  diagonal [1..3] [1..3] `shouldBe` [(1,1),(1,2),(2,1),(3,1),(2,2),(1,3)]
-     -}
+    it "correct diagonalizations 1×1" $ do
+      diagonal [1..1] [1..1] `shouldBe` [(1 :: Int,1 :: Int)]
+    it "correct diagonalizations 2×2" $ do
+      diagonal [1..2] [1..2] `shouldBe` [(1 :: Int,1 :: Int),(2,1),(1,2),(2,2)]
+    it "correct diagonalizations 3×3" $ do
+      diagonal [1..3] [1..3] `shouldBe` [(1 :: Int,1 :: Int),(2,1),(1,2),(1,3),(2,2),(3,1),(3,2),(2,3),(3,3)]
     it "makes the right specific initial diagonal" $ do
       mkDiagonal ['A'..'E'] [0..4 :: Int] `shouldBe` Just (Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4])
     testingDiagonalExamples "Down first" orderedDown
