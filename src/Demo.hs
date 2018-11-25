@@ -259,23 +259,6 @@ trancl r x0 = go [] x0
      -go6 = tgthr [2,0,3,4,1] []
      -}
 
-diagonalProduct :: [a] -> [b] -> [(a,b)]
-diagonalProduct [] _ = []
-diagonalProduct _ [] = []
-diagonalProduct (a:as) (b:bs) = (a,b) : merge (diagonalProduct (a:as) bs) (diagonalProduct as (b:bs))
-  where
-    merge :: [c] -> [c] -> [c]
-    merge [] xs = xs
-    merge xs [] = xs
-    merge (x:xs) (y:ys) = x : y : merge xs ys
-
-{-
- -mergeWith :: (a -> b -> c) -> [a] -> [b] -> [c]
- -mergeWith f (a:as) (b:bs) = f a b
- -  where
- -    nextRight (x:xs) (y:ys) = 
- -}
-
 newtype RevList a = R [a]
   deriving stock (Eq, Show)
   deriving newtype (IsList)
