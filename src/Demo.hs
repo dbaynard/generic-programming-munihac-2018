@@ -291,50 +291,76 @@ mkZipper :: [a] -> Maybe (Zipper a)
 mkZipper [] = Nothing
 mkZipper (x:xs) = Just $ Z [] x (F xs)
 
-data Diagonal a b = Diagonal (Zipper a) (Zipper b)
+data Diagonal a b
+  = Across (Zipper a) (Zipper b)
+  | Down (Zipper a) (Zipper b)
   deriving stock (Eq, Show)
-infixr 6 `Diagonal`
+infixr 6 `Across`
+infixr 6 `Down`
 
 diagonal :: [a] -> [b] -> [(a,b)]
 diagonal = curry $ runDiag <=< maybeToList . uncurry mkDiagonal
 
 mkDiagonal :: [a] -> [b] -> Maybe (Diagonal a b)
-mkDiagonal = curry $ fmap (uncurry Diagonal) . azip . bimap mkZipper mkZipper
+mkDiagonal = curry $ fmap (uncurry Down) . azip . bimap mkZipper mkZipper
 
 azip :: Applicative f => (f a, f b) -> f (a, b)
 azip = uncurry $ (<*>) . fmap (,)
 {-# INLINE azip #-}
 
 runDiag :: Diagonal a b -> [(a,b)]
-runDiag = fix runDiag' False
+runDiag = fix runDiag'
 
 runDiag'
-  :: (Bool -> Diagonal a b -> [(a,b)])
-  -> Bool -> Diagonal a b -> [(a,b)]
-runDiag' r b0 d0 = case nextDiag b0 d0 of
+  :: (Diagonal a b -> [(a,b)])
+  -> Diagonal a b -> [(a,b)]
+runDiag' r d0 = case nextDiag d0 of
   (pair, Nothing) -> [pair]
-  (_, Just (b1, d1)) -> r b1 d1
+  (_, Just d1) -> r d1
 
-type NextDiag a b = ((a,b), Maybe (Bool, Diagonal a b))
+type NextDiag a b = ((a,b), Maybe (Diagonal a b))
 
-nextDiag :: Bool -> Diagonal a b -> NextDiag a b
+nextDiag :: Diagonal a b -> NextDiag a b
 -- empty case
-nextDiag _ (Z _ b [] `Diagonal` Z _ y []) = ((b,y), Nothing)
--- Opposite empties
--- When there is no forward list on one, drop the focus for the other, where there is only a head-forward list
-nextDiag q@False (Z [] b (F (d:c)) `Diagonal` Z (R (w:x)) y []) = ((b,y), Just (q, (Z [] d (F c) `Diagonal` Z (R x) w (F [y]))))
-nextDiag q@False (Z (R (d:a)) b [] `Diagonal` Z [] y (F (w:z))) = ((b,y), Just (not q, (Z (R a) d (F [b]) `Diagonal` Z [] w (F z))))
--- part forward empty cases
-nextDiag q (Z (R a) b (F (d:c)) `Diagonal` Z x y []) = ((b,y), Just (q, (Z (R (b:a)) d (F c) `Diagonal` Z x y [])))
-nextDiag q (Z a b [] `Diagonal` Z (R x) y (F (w:z))) = ((b,y), Just (q, (Z a b [] `Diagonal` Z (R (y:x)) w (F z))))
+nextDiag (Z _ b [] `Across` Z _ y []) = ((b,y), Nothing)
+nextDiag (Z _ b [] `Down` Z _ y []) = ((b,y), Nothing)
+
 -- initial case
--- When there is no reverse list for right, shift the left zipper by one
--- and fiip the zipper
-nextDiag q@False (Z (R a) b (F (d:c)) `Diagonal` Z [] y z) = ((b,y), Just ((not q), (Z (R (b:a)) d (F c) `Diagonal` Z [] y z)))
--- When there is no reverse list for left, shift the right zipper by one
--- and fiip the zipper
-nextDiag q@True (Z [] b c `Diagonal` Z (R x) y (F (w:z))) = ((b,y), Just ((not q), (Z [] b c `Diagonal` Z (R (y:x)) w (F z))))
--- Run the left zipper forwards and the right zipper backwards
-nextDiag q@False (Z (R a) b (F (d:c)) `Diagonal` Z (R (w:x)) y (F z)) = ((b,y), Just (q, (Z (R (b:a)) d (F c) `Diagonal` Z (R x) w (F (y:z)))))
--- Run the left zipper backwards and the right zipper forwards
-nextDiag q@True (Z (R (d:a)) b (F c) `Diagonal` Z (R x) y (F (w:z))) = ((b,y), Just (q, (Z (R a) d (F (b:c)) `Diagonal` Z (R (y:x)) w (F z))))
+-- Going Down, shuffle left forwards and flip
+nextDiag (Z [] b (F (d:c)) `Down` r@(Z [] y _)) = ((b,y), Just (Z (R [b]) d (F c) `Across` r))
+
+-- Corner cases (opposites empty)
+-- Going down, when there is no reverse list on the left and no forward
+-- list on the right, drop the focus on the left and shuffle the right list
+-- backwards
+nextDiag (Z [] b (F (d:c)) `Down` Z (R (w:x)) y []) = ((b,y), Just (Z [] d (F c) `Down` Z (R x) w (F [y])))
+-- Going down, when there is no reverse list on the right and no forward
+-- list on the left, drop the focus on the right and flip the Zipper
+nextDiag (l@(Z _ b []) `Down` Z [] y (F (w:z))) = ((b,y), Just (l `Across` Z [] w (F z)))
+-- Going across, when there is no reverse list on the right and no forward
+-- list on the left, drop the focus on the right and shuffle the left list
+-- backwards
+nextDiag ((Z (R (d:a)) b []) `Across` Z [] y (F (w:z))) = ((b,y), Just (Z (R a) d (F [b]) `Across` Z [] w (F z)))
+-- Going across, when there is no reverse list on the left and no forward
+-- list on the right, drop the focus on the left and flip the Zipper
+nextDiag (Z [] b (F (d:c)) `Across` r@(Z _ y [])) = ((b,y), Just (Z [] d (F c) `Down` r))
+
+-- Going across, when there is no reverse list for right, shuffle left
+-- focus backwards and right forwards
+nextDiag (Z (R (d:a)) b (F c) `Across` Z [] y (F (w:z))) = ((b,y), Just (Z (R a) d (F (b:c)) `Across` Z (R [y]) w (F z)))
+-- Actually, it doesn't matter what the right list is here, making the above
+-- redundant
+nextDiag (Z (R (d:a)) b (F c) `Across` Z (R x) y (F (w:z))) = ((b,y), Just (Z (R a) d (F (b:c)) `Across` Z (R (y:x)) w (F z)))
+-- Going across, when there is no reverse list for left, flip Zipper and
+-- shuffle right focus forwards
+nextDiag (l@(Z [] b _) `Across` Z (R x) y (F (w:z))) = ((b,y), Just (l `Down` Z (R (y:x)) w (F z)))
+
+-- Going down, when there is no reverse list for right, flip Zipper and
+-- shuffle left focus forwards
+nextDiag (Z (R a) b (F (d:c)) `Down` r@(Z [] y _)) = ((b,y), Just (Z (R (b:a)) d (F c) `Across` r))
+-- Going down, when there is no reverse list for left, shuffle left focus
+-- forwards and right backwards
+nextDiag (Z [] b (F (d:c)) `Down` Z (R (w:x)) y (F z)) = ((b,y), Just (Z (R [b]) d (F c) `Down` Z (R x) w (F (y:z))))
+-- Actually, it doesn't matter what the left list is here, making the above
+-- redundant
+nextDiag (Z (R a) b (F (d:c)) `Down` Z (R (w:x)) y (F z)) = ((b,y), Just (Z (R (b:a)) d (F c) `Down` Z (R x) w (F (y:z))))

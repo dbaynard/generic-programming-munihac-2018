@@ -40,53 +40,54 @@ spec = do
 
   describe "Diagonalization" $ do
     prop "makes the right initial diagonal" $ \as'@((a :: Int) :| as) bs'@((b :: Int) :| bs) -> do
-      mkDiagonal (NE.toList as') (NE.toList bs') === Just (Z [] a (F as) `Diagonal` Z [] b (F bs))
-    it "correct diagonalizations 1×1" $ do
-      diagonal [1..1] [1..1] `shouldBe` [(1 :: Int,1 :: Int)]
+      mkDiagonal (NE.toList as') (NE.toList bs') === Just (Z [] a (F as) `Down` Z [] b (F bs))
     {-
+     -it "correct diagonalizations 1×1" $ do
+     -  diagonal [1..1] [1..1] `shouldBe` [(1 :: Int,1 :: Int)]
      -it "correct diagonalizations 2×2" $ do
      -  diagonal [1..2] [1..2] `shouldBe` [(1,1),(1,2),(2,1),(2,2)]
      -it "correct diagonalizations 3×3" $ do
      -  diagonal [1..3] [1..3] `shouldBe` [(1,1),(1,2),(2,1),(3,1),(2,2),(1,3)]
      -}
     it "makes the right specific initial diagonal" $ do
-      mkDiagonal [0..4 :: Int] [0..4 :: Int] `shouldBe` Just (Z [] 0 [1..4] `Diagonal` Z [] 0 [1..4])
+      mkDiagonal ['A'..'E'] [0..4 :: Int] `shouldBe` Just (Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4])
     sequence_ $ testingDiagonalExample <$> ZipList [0..] <*> ZipList ordered <*> ZipList (tail ordered)
 
-testingDiagonalExample :: Int -> (NextDiag Int Int) -> (NextDiag Int Int) -> Spec
-testingDiagonalExample n (_, Just ex) res = it ("Example iteration " <> show n) $
-  uncurry nextDiag ex `shouldBe` res
+testingDiagonalExample :: (Eq a, Eq b, Show a, Show b) => Int -> (NextDiag a b) -> (NextDiag a b) -> Spec
+testingDiagonalExample n (_, Just ex) res = it (unwords ["Example iteration", show n, show (fst res)]) $
+  nextDiag ex `shouldBe` res
 testingDiagonalExample _ _ _ = error "Invalid test input"
 
-ordered :: [NextDiag Int Int]
+ordered :: [NextDiag Char Int]
 ordered =
-  [ (undefined, Just (False, Z [] 0 [1..4] `Diagonal` Z [] 0 [1..4]))
-  , ((0,0), Just (True, Z [0] 1 [2..4] `Diagonal` Z [] 0 [1..4]))
-  , ((1,0), Just (True, Z [] 0 [1..4] `Diagonal` Z [0] 1 [2..4]))
-  , ((0,1), Just (False, Z [] 0 [1..4] `Diagonal` Z [1,0] 2 [3..4]))
-  , ((0,2), Just (False, Z [0] 1 [2..4] `Diagonal` Z [0] 1 [2..4]))
-  , ((1,1), Just (False, Z [1,0] 2 [3..4] `Diagonal` Z [] 0 [1..4]))
-  , ((2,0), Just (True, Z [2,1..0] 3 [4] `Diagonal` Z [] 0 [1..4]))
-  , ((3,0), Just (True, Z [1,0] 2 [3..4] `Diagonal` Z [0] 1 [2..4]))
-  , ((2,1), Just (True, Z [0] 1 [2..4] `Diagonal` Z [1,0] 2 [3..4]))
-  , ((1,2), Just (True, Z [] 0 [1..4] `Diagonal` Z [2,1..0] 3 [4]))
-  , ((0,3), Just (False, Z [] 0 [1..4] `Diagonal` Z [3,2..0] 4 []))
-  , ((0,4), Just (False, Z [] 1 [2..4] `Diagonal` Z [2,1..0] 3 [4]))
-  , ((1,3), Just (False, Z [1] 2 [3..4] `Diagonal` Z [1,0] 2 [3..4]))
-  , ((2,2), Just (False, Z [2,1] 3 [4] `Diagonal` Z [0] 1 [2..4]))
-  , ((3,1), Just (False, Z [3,2..1] 4 [] `Diagonal` Z [] 0 [1..4]))
-  , ((4,0), Just (True, Z [3,2..1] 4 [] `Diagonal` Z [] 1 [2..4]))
-  , ((4,1), Just (True, Z [2,1] 3 [4] `Diagonal` Z [1] 2 [3..4]))
-  --, ((3,2), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((2,3), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((1,4), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((2,4), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((3,3), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((4,2), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((4,3), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((3,4), Just (True, Z [3,2..0] 4 [] `Diagonal` Z [] 0 [1..4]))
-  --, ((4,4), Nothing)
+  [ (undefined, Just ( Z [] 'A' ['B'..'E'] `Down` Z [] 0 [1..4]))
+  , (('A',0), Just (Z ['A'] 'B' ['C'..'E'] `Across` Z [] 0 [1..4]))
+  , (('B',0), Just (Z [] 'A' ['B'..'E'] `Across` Z [0] 1 [2..4]))
+  , (('A',1), Just (Z [] 'A' ['B'..'E'] `Down` Z [1,0] 2 [3..4]))
+  , (('A',2), Just (Z ['A'] 'B' ['C'..'E'] `Down` Z [0] 1 [2..4]))
+  , (('B',1), Just (Z ['B','A'] 'C' ['D'..'E'] `Down` Z [] 0 [1..4]))
+  , (('C',0), Just (Z ['C','B'..'A'] 'D' ['E'] `Across` Z [] 0 [1..4]))
+  , (('D',0), Just (Z ['B','A'] 'C' ['D'..'E'] `Across` Z [0] 1 [2..4]))
+  , (('C',1), Just (Z ['A'] 'B' ['C'..'E'] `Across` Z [1,0] 2 [3..4]))
+  , (('B',2), Just (Z [] 'A' ['B'..'E'] `Across` Z [2,1..0] 3 [4]))
+  , (('A',3), Just (Z [] 'A' ['B'..'E'] `Down` Z [3,2..0] 4 []))
+  , (('A',4), Just (Z [] 'B' ['C'..'E'] `Down` Z [2,1..0] 3 [4]))
+  , (('B',3), Just (Z ['B'] 'C' ['D'..'E'] `Down` Z [1,0] 2 [3..4]))
+  , (('C',2), Just (Z ['C','B'] 'D' ['E'] `Down` Z [0] 1 [2..4]))
+  , (('D',1), Just (Z ['D','C'..'B'] 'E' [] `Down` Z [] 0 [1..4]))
+  , (('E',0), Just (Z ['D','C'..'B'] 'E' [] `Across` Z [] 1 [2..4]))
+  , (('E',1), Just (Z ['C','B'] 'D' ['E'] `Across` Z [] 2 [3..4]))
+  , (('D',2), Just (Z ['B'] 'C' ['D'..'E'] `Across` Z [2] 3 [4]))
+  , (('C',3), Just (Z [] 'B' ['C'..'E'] `Across` Z [3,2] 4 []))
+  , (('B',4), Just (Z [] 'C' ['D'..'E'] `Down` Z [3,2] 4 []))
+  , (('C',4), Just (Z [] 'D' ['E'] `Down` Z [2] 3 [4]))
+  , (('D',3), Just (Z ['D'] 'E' [] `Down` Z [] 2 [3,4]))
+  , (('E',2), Just (Z ['D'] 'E' [] `Across` Z [] 3 [4]))
+  , (('E',3), Just (Z [] 'D' ['E'] `Across` Z [] 4 []))
+  , (('D',4), Just (Z [] 'E' [] `Down` Z [] 4 []))
+  , (('E',4), Nothing)
   ]
 
 raceTest :: Expectation -> Expectation
 raceTest = race_ (threadDelay 1e6 *> expectationFailure "Test took too long")
+
