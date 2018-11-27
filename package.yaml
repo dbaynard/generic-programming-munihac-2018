@@ -11,6 +11,7 @@ library:
   source-dirs: src
   exposed-modules:
   - Demo
+  - Record
 tests:
   translc:
     source-dirs:

@@ -1,10 +1,11 @@
--- This file has been generated from package.yaml by hpack version 0.27.0.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b9e8546579d42cd8cc971c0f17d1444f2a551d2b0fbd15f7318db5c0cc7704bb
+-- hash: d390eb7098259e1c9996306550803a4c6d0d5c366d61f9f977073bda0e64bceb
 
-cabal-version:  >= 1.10
 name:           generic-programming-munihac
 version:        2018
 author:         Andres Löh <andres@well-typed.com>
@@ -18,6 +19,7 @@ library
   default-language: Haskell2010
   exposed-modules:
     Demo
+    Record
   other-modules:
     Paths_generic_programming_munihac
   build-depends:
@@ -31,6 +33,7 @@ test-suite translc
   main-is: Spec.hs
   other-modules:
     Demo
+    Record
     DemoSpec
     Paths_generic_programming_munihac
   hs-source-dirs:
