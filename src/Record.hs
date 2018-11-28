@@ -35,6 +35,7 @@ type family (:::) (tag :: k) (label :: Symbol) :: *
 infix 5 :::
 
 type instance (:::) Void label = Void
+type instance (:::) () label = ()
 
 data Shown
 
@@ -128,7 +129,7 @@ data CustomEnum_ w
   | Second (w ::: "The second")
   deriving stock (Generic)
 
-type CustomEnum = CustomEnum_ Void
+type CustomEnum = CustomEnum_ ()
 
 firsty :: CustomEnum
 firsty = First undefined
@@ -146,6 +147,9 @@ instance Show (CustomEnum_ Shown) where
 
 deriving via (AsEq CustomEnum) instance Eq CustomEnum
 deriving via (AsEq CustomEnum) instance GEq CustomEnum
+
+deriving via (AsEnum Void) instance MyGEnum Void
+deriving via (AsEnum ()) instance MyGEnum ()
 
 deriving via (AsEnum CustomEnum) instance MyGEnum CustomEnum
 deriving via (AsEnum CustomEnum) instance Enum CustomEnum
