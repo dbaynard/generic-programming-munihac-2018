@@ -7,6 +7,7 @@ dependencies:
 - mtl
 - sop-core >=0.4 && <0.5
 - generics-sop >=0.4.0.1 && <0.5
+- generic-deriving
 library:
   source-dirs: src
   exposed-modules:

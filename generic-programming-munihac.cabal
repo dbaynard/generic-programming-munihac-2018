@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d390eb7098259e1c9996306550803a4c6d0d5c366d61f9f977073bda0e64bceb
+-- hash: 54df1d1e0b9609b2701b4232e63dd4bcf6b252ed0c2f4863332d011ee14e1653
 
 name:           generic-programming-munihac
 version:        2018
@@ -24,6 +24,7 @@ library
     Paths_generic_programming_munihac
   build-depends:
     base,
+    generic-deriving,
     generics-sop >=0.4.0.1 && <0.5,
     mtl,
     sop-core >=0.4 && <0.5
@@ -44,6 +45,7 @@ test-suite translc
     QuickCheck,
     async,
     base,
+    generic-deriving,
     generic-programming-munihac,
     generics-sop >=0.4.0.1 && <0.5,
     hspec,
