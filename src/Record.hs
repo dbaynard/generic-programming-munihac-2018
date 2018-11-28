@@ -42,22 +42,20 @@ type instance (:::) Shown label = Proxy label
 
 --------------------------------------------------------------------------------
 
-newtype AsEq a = AsEq a
+newtype Default a = Default a
 
-instance (Generic a, GEq' (G.Rep a)) => Eq (AsEq a) where
-  AsEq x == AsEq y = x `geqdefault` y
+instance (Generic a, GEq' (G.Rep a)) => Eq (Default a) where
+  Default x == Default y = x `geqdefault` y
 
-instance (Generic a, GEq' (G.Rep a)) => GEq (AsEq a) where
-  AsEq x `geq` AsEq y = x `geqdefault` y
+instance (Generic a, GEq' (G.Rep a)) => GEq (Default a) where
+  Default x `geq` Default y = x `geqdefault` y
 
-newtype AsEnum a = AsEnum a
+instance (Generic a, GEq a, Enum' (G.Rep a)) => Enum (Default a) where
+  toEnum = Default . toEnumDefault
+  fromEnum (Default x) = fromEnumDefault x
 
-instance (Generic a, GEq a, Enum' (G.Rep a)) => Enum (AsEnum a) where
-  toEnum = AsEnum . toEnumDefault
-  fromEnum (AsEnum x) = fromEnumDefault x
-
-instance (Generic a, GEq a, Enum' (G.Rep a)) => GEnum (AsEnum a) where
-  genum = AsEnum . G.to <$> enum'
+instance (Generic a, GEq a, Enum' (G.Rep a)) => GEnum (Default a) where
+  genum = Default . G.to <$> enum'
 
 --------------------------------------------------------------------------------
 
@@ -82,8 +80,8 @@ instance Show (CustomEnum_ Shown) where
   show (First p) = symbolVal p
   show (Second p) = symbolVal p
 
-deriving via (AsEq CustomEnum) instance Eq CustomEnum
-deriving via (AsEq CustomEnum) instance GEq CustomEnum
+deriving via (Default CustomEnum) instance Eq CustomEnum
+deriving via (Default CustomEnum) instance GEq CustomEnum
 
-deriving via (AsEnum CustomEnum) instance GEnum CustomEnum
-deriving via (AsEnum CustomEnum) instance Enum CustomEnum
+deriving via (Default CustomEnum) instance GEnum CustomEnum
+deriving via (Default CustomEnum) instance Enum CustomEnum
